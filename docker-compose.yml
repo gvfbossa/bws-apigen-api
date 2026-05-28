@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: bws-apigen-db
+    environment:
+      POSTGRES_DB: bws-apigen-db
+      POSTGRES_USER: ${POSTGRES_PROD_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+    volumes:
+      - bws-apigen-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  api:
+    image: bossaws2024/bws-apigen:latest
+    container_name: bws-apigen-api
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      POSTGRES_PROD_USERNAME: ${POSTGRES_PROD_USERNAME}
+      POSTGRES_PROD_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_APIGEN_PRICE_ID_ADMIN: ${STRIPE_APIGEN_PRICE_ID_ADMIN}
+      STRIPE_APIGEN_PRICE_ID_SOLO: ${STRIPE_APIGEN_PRICE_ID_SOLO}
+      STRIPE_APIGEN_PRICE_ID_SMALL: ${STRIPE_APIGEN_PRICE_ID_SMALL}
+      STRIPE_APIGEN_PRICE_ID_FULL: ${STRIPE_APIGEN_PRICE_ID_FULL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      WEBSOCKET_PATH: ${WEBSOCKET_PATH}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  bws-apigen-db-data:
