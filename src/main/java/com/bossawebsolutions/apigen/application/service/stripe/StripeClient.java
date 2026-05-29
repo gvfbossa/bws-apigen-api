@@ -3,9 +3,7 @@ package com.bossawebsolutions.apigen.application.service.stripe;
 import com.bossawebsolutions.apigen.domain.entity.PaymentCard;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Customer;
-import com.stripe.model.PaymentMethod;
-import com.stripe.model.Subscription;
+import com.stripe.model.*;
 import com.stripe.param.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -42,19 +40,22 @@ public class StripeClient {
         customer.update(params);
     }
 
-    public Subscription createSubscription(String customerId, String priceId, String paymentMethodId) throws StripeException {
-        SubscriptionCreateParams params = SubscriptionCreateParams.builder()
-                .setCustomer(customerId)
-                .addItem(
-                        SubscriptionCreateParams.Item.builder()
-                                .setPrice(priceId)
-                                .build()
-                )
-                .setDefaultPaymentMethod(paymentMethodId)
-                .setPaymentBehavior(SubscriptionCreateParams.PaymentBehavior.ERROR_IF_INCOMPLETE)
-                .build();
+    public PaymentIntent createOneTimePaymentIntent(
+            String customerId,
+            long amountInCents,
+            String paymentMethodId
+    ) throws StripeException {
 
-        return Subscription.create(params);
+        PaymentIntentCreateParams params =
+                PaymentIntentCreateParams.builder()
+                        .setCustomer(customerId)
+                        .setAmount(amountInCents)
+                        .setCurrency("brl")
+                        .setPaymentMethod(paymentMethodId)
+                        .setConfirm(true)
+                        .build();
+
+        return PaymentIntent.create(params);
     }
 
     public PaymentCard getCardInfo(String paymentMethodId) throws StripeException {
@@ -73,6 +74,10 @@ public class StripeClient {
                 card.getExpYear(),
                 pm.getId()
         );
+    }
+
+    public Price getPrice(String priceId) throws StripeException {
+        return Price.retrieve(priceId);
     }
 
 }

@@ -1,17 +1,14 @@
 package com.bossawebsolutions.apigen.application.service;
 
-import com.bossawebsolutions.apigen.application.service.stripe.SubscriptionService;
+import com.bossawebsolutions.apigen.application.service.stripe.PaymentService;
 import com.bossawebsolutions.apigen.application.service.websocket.WebSocketService;
 import com.bossawebsolutions.apigen.config.JwtService;
 import com.bossawebsolutions.apigen.domain.Plan;
-import com.bossawebsolutions.apigen.domain.SubscriptionStatus;
+import com.bossawebsolutions.apigen.domain.LicenceStatus;
 import com.bossawebsolutions.apigen.domain.entity.User;
-import com.bossawebsolutions.apigen.application.utils.SystemUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -19,10 +16,9 @@ public class AuthService {
 
     private final UserService userService;
     private final MachineService machineService;
-    private final SubscriptionService subscriptionService;
+    private final PaymentService paymentService;
     private final WebSocketService webSocketService;
     private final JwtService jwtService;
-    private final SystemUtils systemUtils;
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -45,15 +41,15 @@ public class AuthService {
             if (paymentMethodId == null || paymentMethodId.isBlank()) {
                 throw new RuntimeException("Payment method required for plan " + plan);
             }
-            subscriptionService.criarAssinaturaStripe(user, paymentMethodId);
+            paymentService.processOneTimePayment(user, paymentMethodId);
             user.setActive(true);
             userService.save(user);
 
-            webSocketService.notifySubscriptionStatus(user.getId(), user.getSubscriptionStatus());
+            webSocketService.notifyLicenceStatus(user.getId(), user.getLicenceStatus());
         } else {
             user.setActive(true);
             userService.save(user);
-            webSocketService.notifySubscriptionStatus(user.getId(), SubscriptionStatus.ACTIVE);
+            webSocketService.notifyLicenceStatus(user.getId(), LicenceStatus.ACTIVE);
         }
     }
 
@@ -66,12 +62,12 @@ public class AuthService {
         if (!encoder.matches(password, user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
         }
-        checkSubscriptionActive(user);
+        checkLicenceActive(user);
         var machineOpt = machineService.findByUserAndMachineHash(user, machineHash);
 
         if (machineOpt.isEmpty()) {
             long count = machineService.countMachinesByUser(user);
-            int limit = systemUtils.machineLimit(user.getPlan());
+            int limit = machineLimit(user.getPlan());
 
             if (count >= limit) {
                 throw new RuntimeException("Machine limit reached");
@@ -89,14 +85,26 @@ public class AuthService {
         if (!encoder.matches(password, user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
         }
-        checkSubscriptionActive(user);
+        checkLicenceActive(user);
         return jwtService.generateToken(user.getEmail(), null);
     }
 
-    private void checkSubscriptionActive(User user) {
-        if (!user.isActive() && (user.getSubscriptionPaidUntil() == null || LocalDate.now().isAfter(user.getSubscriptionPaidUntil().toLocalDate()))) {
-            throw new RuntimeException("Subscription expired or inactive");
+    private void checkLicenceActive(User user) {
+        if (!user.isActive()) {
+            throw new RuntimeException("Inactive account");
         }
+        if (user.getLicenceStatus() != LicenceStatus.ACTIVE) {
+            throw new RuntimeException("Licence inactive");
+        }
+    }
+
+    private int machineLimit(Plan plan) {
+        return switch (plan) {
+            case ADMIN -> 9999;
+            case SOLO -> 1;
+            case SMALL -> 5;
+            case FULL -> 10;
+        };
     }
 
 }

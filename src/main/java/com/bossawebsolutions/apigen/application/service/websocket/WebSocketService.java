@@ -1,6 +1,6 @@
 package com.bossawebsolutions.apigen.application.service.websocket;
 
-import com.bossawebsolutions.apigen.domain.SubscriptionStatus;
+import com.bossawebsolutions.apigen.domain.LicenceStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -11,9 +11,9 @@ public class WebSocketService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void notifySubscriptionStatus(Long userId, SubscriptionStatus status) {
+    public void notifyLicenceStatus(Long userId, LicenceStatus status) {
         messagingTemplate.convertAndSend(
-                "/topic/subscription-status/" + userId,
+                "/topic/licence-status/" + userId,
                 status
         );
     }

@@ -1,14 +1,11 @@
 package com.bossawebsolutions.apigen.application.utils;
 
-
 import com.bossawebsolutions.apigen.application.service.UserService;
 import com.bossawebsolutions.apigen.domain.entity.User;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class SecurityUtil {
@@ -19,7 +16,7 @@ public class SecurityUtil {
         this.usuarioService = usuarioService;
     }
 
-    public User getUsuarioLogado() {
+    public User getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() ||

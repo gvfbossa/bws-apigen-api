@@ -7,7 +7,6 @@ import com.bossawebsolutions.apigen.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 
@@ -18,12 +17,13 @@ public class DashboardService {
     private final SecurityUtil securityUtil;
 
     public UserDashboardResponseDTO getUserDashboardInfo() {
-        User user = securityUtil.getUsuarioLogado();
+        User user = securityUtil.getLoggedUser();
 
         int maxMachines = switch (user.getPlan().name()) {
             case "SOLO" -> 1;
-            case "SMALL" -> 15;
-            case "FULL" -> 50;
+            case "SMALL" -> 5;
+            case "FULL" -> 10;
+            case "ADMIN" -> 9999;
             default -> 0;
         };
 
@@ -35,7 +35,7 @@ public class DashboardService {
                 .filter(h -> h != null && !h.isEmpty())
                 .count();
 
-        int machinesTotal = user.getMachines().size(); // substitui apisGenerated
+        int machinesTotal = user.getMachines().size();
         String lastMachineRegistered = user.getMachines().stream()
                 .max(Comparator.comparing(Machine::getCreatedAt))
                 .map(m -> m.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
@@ -46,10 +46,7 @@ public class DashboardService {
                 user.getName(),
                 user.getEmail(),
                 user.getPlan().name(),
-                user.getSubscriptionStatus().name(),
-                LocalDate.of(user.getSubscriptionPaidUntil().getYear(),
-                        user.getSubscriptionPaidUntil().getMonth(),
-                        user.getSubscriptionPaidUntil().getDayOfMonth()),
+                user.getLicenceStatus().name(),
                 usedMachines,
                 maxMachines,
                 machinesTotal,

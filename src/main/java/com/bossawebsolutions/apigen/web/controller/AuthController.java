@@ -64,10 +64,4 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/cancel-subscription")
-    public ResponseEntity<Void> cancelSubscription() {
-        userService.cancelSubscription();
-        return ResponseEntity.ok().build();
-    }
-
 }

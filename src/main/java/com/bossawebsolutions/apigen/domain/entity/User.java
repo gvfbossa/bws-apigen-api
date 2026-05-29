@@ -1,7 +1,7 @@
 package com.bossawebsolutions.apigen.domain.entity;
 
 import com.bossawebsolutions.apigen.domain.Plan;
-import com.bossawebsolutions.apigen.domain.SubscriptionStatus;
+import com.bossawebsolutions.apigen.domain.LicenceStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,15 +44,13 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private String stripeSubscriptionId;
+    private String stripePaymentIntentId;
 
     @Column(unique = true)
     private String stripeCustomerId;
 
     @Enumerated(EnumType.STRING)
-    private SubscriptionStatus subscriptionStatus = SubscriptionStatus.INACTIVE;
-
-    private LocalDateTime subscriptionPaidUntil;
+    private LicenceStatus licenceStatus = LicenceStatus.INACTIVE;
 
     @PrePersist
     public void prePersist() {

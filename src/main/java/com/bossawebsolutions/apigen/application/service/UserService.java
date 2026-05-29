@@ -1,13 +1,11 @@
 package com.bossawebsolutions.apigen.application.service;
 
-import com.bossawebsolutions.apigen.application.service.stripe.SubscriptionService;
+import com.bossawebsolutions.apigen.application.service.stripe.PaymentService;
 import com.bossawebsolutions.apigen.application.utils.SecurityUtil;
-import com.bossawebsolutions.apigen.domain.SubscriptionStatus;
 import com.bossawebsolutions.apigen.domain.entity.User;
 import com.bossawebsolutions.apigen.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,7 +16,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final SecurityUtil securityUtil;
-    private final SubscriptionService subscriptionService;
+    private final PaymentService paymentService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -35,20 +33,13 @@ public class UserService {
     }
 
     public void changePassword(String currentPassword, String newPassword) {
-        User user = securityUtil.getUsuarioLogado();
+        User user = securityUtil.getLoggedUser();
 
         if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
             throw new IllegalArgumentException("Current password is incorrect");
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-    }
-
-    public void cancelSubscription() {
-        User user = securityUtil.getUsuarioLogado();
-        user.setSubscriptionStatus(SubscriptionStatus.CANCELED);
-        subscriptionService.cancelarAssinaturaNoStripe(user.getStripeSubscriptionId());
         userRepository.save(user);
     }
 
