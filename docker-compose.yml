@@ -13,8 +13,10 @@ services:
     restart: unless-stopped
 
   api:
-    image: bossaws2024/bws-apigen:latest
+    image: bossaws2024/bwsapigen:latest
     container_name: bws-apigen-api
+    env_file:
+      - .env
     environment:
       SPRING_PROFILES_ACTIVE: prod
       POSTGRES_PROD_USERNAME: ${POSTGRES_PROD_USERNAME}
