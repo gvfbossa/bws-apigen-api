@@ -41,6 +41,8 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Machine> machines = new ArrayList<>();
 
+    private Integer totalGeneratedApis = 0;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

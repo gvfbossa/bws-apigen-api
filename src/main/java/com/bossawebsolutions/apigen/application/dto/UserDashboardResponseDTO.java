@@ -10,5 +10,6 @@ public record UserDashboardResponseDTO(
         Integer maxMachines,
         Integer machinesTotal,
         String lastMachineRegistered,
+        Integer totalGeneratedApis,
         Boolean isPlanEligiblePremiumContact
 ) { }

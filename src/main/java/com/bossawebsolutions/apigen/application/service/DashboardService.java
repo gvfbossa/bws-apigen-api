@@ -51,6 +51,7 @@ public class DashboardService {
                 maxMachines,
                 machinesTotal,
                 lastMachineRegistered,
+                user.getTotalGeneratedApis(),
                 isPlanEligiblePremiumContact
         );
     }

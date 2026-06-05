@@ -47,6 +47,8 @@ public class GenerateController {
         byte[] zip = generatorService.generate(entities, request.getBasePackage());
 
         String base64Zip = Base64.getEncoder().encodeToString(zip);
+
+        userService.updateUserGeneratedApis(user);
         return ResponseEntity.ok(base64Zip);
     }
 }

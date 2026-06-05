@@ -43,4 +43,9 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void updateUserGeneratedApis(User user) {
+        user.setTotalGeneratedApis(user.getTotalGeneratedApis() + 1);
+        userRepository.save(user);
+    }
+
 }
