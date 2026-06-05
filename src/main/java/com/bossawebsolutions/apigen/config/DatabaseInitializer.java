@@ -39,6 +39,7 @@ public class DatabaseInitializer {
             userAdmin.setLicenceStatus(LicenceStatus.ACTIVE);
             userAdmin.setStripeCustomerId(null);
             userAdmin.setStripePaymentIntentId(null);
+            userAdmin.setTotalGeneratedApis(0);
             userService.save(userAdmin);
         }
     }
